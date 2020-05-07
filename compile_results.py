@@ -1,6 +1,7 @@
 lines = []  # raw lines from log file
 
 
+# A class for each runner. This is the class that gets updated for each line in the log file
 class Runner:
     name = ""
     distance = 0.00
@@ -18,6 +19,7 @@ class Runner:
         self.run_count = run_count
 
 
+# This is a class to hold information about each line in the log file, in a more accessible way.
 class Log:
     runner = ""
     activity = ""
@@ -37,6 +39,8 @@ class Log:
         self.verified = verified
 
 
+# This method reads the log file, and adds each line to the 'lines' list. After finishing, 'lines' now holds all lines
+# in the log file.
 def read_file():
     file = open("runs.log", "r")
     i = 0
@@ -45,6 +49,8 @@ def read_file():
         i += 1
 
 
+# This is the main method for calculating each persons stats. It begins by initialising each runner with stats of zero,
+# and then proceeds to tally up the statistics for each runner.
 def calculate_runners_stats():
     d = Runner('D', 0.0, 0.0, 0.0, 0.0, 0)
     b = Runner('B', 0.0, 0.0, 0.0, 0.0, 0)
@@ -55,6 +61,7 @@ def calculate_runners_stats():
     process_file(runners_list)
 
 
+# Parses each line of the log file read earlier, and then adjusts the appropriate runners stats based on that line.
 def process_file(runners_list):
     for line in lines:
         log = parse_line(line)
@@ -74,6 +81,7 @@ def process_file(runners_list):
     output_runners_results(runners_list)
 
 
+# Just a print method for displaying the results once the processing has finished.
 def output_runners_results(runners_list):
     sort_by_distance(runners_list)
     for runner in runners_list:
@@ -81,11 +89,15 @@ def output_runners_results(runners_list):
               runner.overall_time_minutes, ':', runner.overall_time_secs, ' , lap time: ', runner.lap_time,
               ', run count: ', runner.run_count)
 
+
+# given the finished list of runners, sorts them by distance.
 def sort_by_distance(runner_list):
     runner_list.sort(key=lambda x: x.distance, reverse=True)
     return runner_list
 
 
+# This calculates a runners overall time based on adding the new time in the log line to
+# the old time they had up until this point
 def calculate_overall_time(old_time_mins, old_time_secs, new_time_mins, new_time_secs):
     old_mins = int(old_time_mins)
     old_secs = int(old_time_secs)
@@ -103,6 +115,7 @@ def calculate_overall_time(old_time_mins, old_time_secs, new_time_mins, new_time
     return str(total_mins) + ':' + str(total_secs)
 
 
+# This calculates the runners 'per/KM' time or split time. It does this by looking at the overall time and distance.
 def split_time(overall_time_mins, overall_time_secs, overall_dist):
     converted_time = (int(overall_time_mins) * 60) + int(overall_time_secs)
     split_in_secs = float(converted_time) / float(overall_dist)
@@ -112,6 +125,8 @@ def split_time(overall_time_mins, overall_time_secs, overall_dist):
     return str(split_mins) + ':' + str(secs_mod)
 
 
+# This method parses each log line. Given an english string, its job is to extract the important information, and
+# put it into a Log object, for easier processing.
 def parse_line(line):
     tokens = str.split(line)
     name = tokens[0][1]
@@ -130,5 +145,6 @@ def parse_line(line):
     return log
 
 
+# These are the driver methods. Without these the code will not actually execute.
 read_file()
 calculate_runners_stats()
