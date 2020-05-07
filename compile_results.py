@@ -20,14 +20,16 @@ class Runner:
 
 class Log:
     runner = ""
+    activity = ""
     distance = 0.0
     time_minutes = 0
     time_seconds = 0
     date = ""
     verified = False
 
-    def __init__(self, runner, dist, time_mins, time_secs, date, verified):
+    def __init__(self, runner, activity, dist, time_mins, time_secs, date, verified):
         self.runner = runner
+        self.activity = activity
         self.distance = dist
         self.time_minutes = time_mins
         self.time_seconds = time_secs
@@ -43,7 +45,7 @@ def read_file():
         i += 1
 
 
-def init_runners():
+def calculate_runners_stats():
     d = Runner('D', 0.0, 0.0, 0.0, 0.0, 0)
     b = Runner('B', 0.0, 0.0, 0.0, 0.0, 0)
     g = Runner('G', 0.0, 0.0, 0.0, 0.0, 0)
@@ -57,17 +59,31 @@ def process_file(runners_list):
     for line in lines:
         log = parse_line(line)
 
-        # ********** CHECK THAT ITS A RUN ****************
         for runner in runners_list:
             if log.runner == runner.name:
-                runner.distance += log.distance
-                runner.run_count += 1
-                updated_time = calculate_overall_time(runner.overall_time_minutes, runner.overall_time_secs, log.time_minutes, log.time_seconds)
-                runner.overall_time_minutes = updated_time[0:2]
-                runner.overall_time_secs = updated_time[3:5]
-                split = split_time(runner.overall_time_minutes, runner.overall_time_secs, float(runner.distance))
-                runner.lap_time = split
-                print(split)
+                if log.activity == 'ran':
+                    runner.distance += log.distance
+                    runner.run_count += 1
+                    updated_time = calculate_overall_time(runner.overall_time_minutes, runner.overall_time_secs,
+                                                          log.time_minutes, log.time_seconds)
+                    runner.overall_time_minutes = updated_time[0:2]
+                    runner.overall_time_secs = updated_time[3:5]
+                    split = split_time(runner.overall_time_minutes, runner.overall_time_secs, float(runner.distance))
+                    runner.lap_time = split
+
+    output_runners_results(runners_list)
+
+
+def output_runners_results(runners_list):
+    sort_by_distance(runners_list)
+    for runner in runners_list:
+        print('name: ', runner.name, ' , distance travelled: ', round(runner.distance, 2), ' , overall time: ',
+              runner.overall_time_minutes, ':', runner.overall_time_secs, ' , lap time: ', runner.lap_time,
+              ', run count: ', runner.run_count)
+
+def sort_by_distance(runner_list):
+    runner_list.sort(key=lambda x: x.distance, reverse=True)
+    return runner_list
 
 
 def calculate_overall_time(old_time_mins, old_time_secs, new_time_mins, new_time_secs):
@@ -90,16 +106,17 @@ def calculate_overall_time(old_time_mins, old_time_secs, new_time_mins, new_time
 def split_time(overall_time_mins, overall_time_secs, overall_dist):
     converted_time = (int(overall_time_mins) * 60) + int(overall_time_secs)
     split_in_secs = float(converted_time) / float(overall_dist)
-    secs_mod = float(converted_time) % overall_dist
+    secs_mod = int(round(split_in_secs % 60))
 
-    split_mins = split_in_secs / 60
+    split_mins = int(split_in_secs / 60)
     return str(split_mins) + ':' + str(secs_mod)
 
 
 def parse_line(line):
     tokens = str.split(line)
     name = tokens[0][1]
-    dist = tokens[2][0:3]
+    activity = tokens[1]
+    dist = tokens[2][0:4]
     time_mins = tokens[4][0:2]
     time_secs = tokens[5][0:2]
     date = tokens[7]
@@ -109,10 +126,9 @@ def parse_line(line):
         verified = True
     else:
         verified = False
-    log = Log(name, float(dist), time_mins, time_secs, date, verified)
+    log = Log(name, activity, float(dist), time_mins, time_secs, date, verified)
     return log
 
 
 read_file()
-init_runners()
-# process_file()
+calculate_runners_stats()
