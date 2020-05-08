@@ -43,10 +43,8 @@ class Log:
 # in the log file.
 def read_file():
     file = open("runs.log", "r")
-    i = 0
     for line in file:
         lines.append(line)
-        i += 1
 
 
 # This is the main method for calculating each persons stats. It begins by initialising each runner with stats of zero,
