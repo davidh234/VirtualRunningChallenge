@@ -71,8 +71,9 @@ def process_file(runners_list):
                     runner.run_count += 1
                     updated_time = calculate_overall_time(runner.overall_time_minutes, runner.overall_time_secs,
                                                           log.time_minutes, log.time_seconds)
-                    runner.overall_time_minutes = updated_time[0:2]
-                    runner.overall_time_secs = updated_time[3:5]
+                    minutes_seconds = updated_time.split(':')
+                    runner.overall_time_minutes = minutes_seconds[0]
+                    runner.overall_time_secs = minutes_seconds[1]
                     split = split_time(runner.overall_time_minutes, runner.overall_time_secs, float(runner.distance))
                     runner.lap_time = split
 
